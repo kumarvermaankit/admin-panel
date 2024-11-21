@@ -1,4 +1,4 @@
-import { Form, Input, Button, Card } from "antd";
+import { Form, Input, Button, Card, Image } from "antd";
 import { ILogin } from "../../interfaces";
 import Wrapper from "../../components/wrapper";
 import { useNavigate } from "react-router-dom";
@@ -19,10 +19,19 @@ export const Login = () => {
 
   return (
     <Wrapper height="100vh" backgroundColor="#F4F7FE">
+      <div style={{  
+        marginTop: "calc(50vh - 270px)", 
+        display: "flex", 
+        flexDirection: "column", 
+        justifyContent: "center", 
+        alignItems: "center" ,
+        gap: "20px"
+        }}>
+      <Image src="/logo.png" width="300px" height="200px" preview={false} />
       <Card
         title="LOGIN"
         bordered={false}
-        style={{ width: 500, margin: "auto", marginTop: "calc(50vh - 180px)" }}
+        style={{ width: 500, margin: "auto" }}
       >
         <Form
           name="login"
@@ -60,6 +69,7 @@ export const Login = () => {
           </Form.Item>
         </Form>
       </Card>
+      </div>
     </Wrapper>
   );
 };
