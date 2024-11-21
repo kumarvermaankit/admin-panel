@@ -1,79 +1,81 @@
 import {
-  AppstoreOutlined,
-  BarsOutlined,
+  // AppstoreOutlined,
+  // BarsOutlined,
   LogoutOutlined,
-  PictureOutlined,
-  ScheduleOutlined,
-  ShoppingCartOutlined,
-  ToolOutlined,
-  UserOutlined,
+  // PictureOutlined,
+  // ScheduleOutlined,
+  // ShoppingCartOutlined,
+  // ToolOutlined,
+  // UserOutlined,
 } from "@ant-design/icons";
-import { Button, Menu, MenuProps, Popconfirm } from "antd";
+import { Button, Image, Menu, MenuProps, Popconfirm } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../features/auth";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-const items: MenuItem[] = [
-  {
-    key: "1",
-    label: "Products",
-    icon: <BarsOutlined />,
-    children: [
-      {
-        key: "/products",
-        label: "Products",
-        icon: <BarsOutlined />,
-      },
-      {
-        key: "/categories",
-        label: "Categories",
-        icon: <AppstoreOutlined />,
-      },
-    ],
-  },
-  {
-    key: "2",
-    label: "Orders",
-    icon: <ShoppingCartOutlined />,
-    children: [
-      {
-        key: "/orders",
-        label: "Orders",
-        icon: <ShoppingCartOutlined />,
-      },
-      {
-        key: "/customers",
-        label: "Customers",
-        icon: <UserOutlined />,
-      },
-    ],
-  },
-  {
-    key: "3",
-    label: "Production",
-    icon: <ToolOutlined />,
-    children: [
-      {
-        key: "/work-orders",
-        label: "Work Orders",
-        icon: <ScheduleOutlined />,
-      },
-      {
-        key: "/operations",
-        label: "Operations",
-        icon: <ToolOutlined />,
-      },
-    ],
-  },
+// const items: MenuItem[] = [
+//   {
+//     key: "1",
+//     label: "Products",
+//     icon: <BarsOutlined />,
+//     children: [
+//       {
+//         key: "/products",
+//         label: "Products",
+//         icon: <BarsOutlined />,
+//       },
+//       {
+//         key: "/categories",
+//         label: "Categories",
+//         icon: <AppstoreOutlined />,
+//       },
+//     ],
+//   },
+//   {
+//     key: "2",
+//     label: "Orders",
+//     icon: <ShoppingCartOutlined />,
+//     children: [
+//       {
+//         key: "/orders",
+//         label: "Orders",
+//         icon: <ShoppingCartOutlined />,
+//       },
+//       {
+//         key: "/customers",
+//         label: "Customers",
+//         icon: <UserOutlined />,
+//       },
+//     ],
+//   },
+//   {
+//     key: "3",
+//     label: "Production",
+//     icon: <ToolOutlined />,
+//     children: [
+//       {
+//         key: "/work-orders",
+//         label: "Work Orders",
+//         icon: <ScheduleOutlined />,
+//       },
+//       {
+//         key: "/operations",
+//         label: "Operations",
+//         icon: <ToolOutlined />,
+//       },
+//     ],
+//   },
 
-  {
-    key: "/media",
-    label: "Media",
-    icon: <PictureOutlined />,
-  },
-];
+//   {
+//     key: "/media",
+//     label: "Media",
+//     icon: <PictureOutlined />,
+//   },
+// ];
+
+const items: MenuItem[] = [];
 
 export const KSider = () => {
   const navigate = useNavigate();
@@ -99,8 +101,10 @@ export const KSider = () => {
       <Link to={"/"}>
         <div
           className="logo"
-          style={{ height: "32px", margin: "16px", background: "#9CDBA6" }}
-        />
+          style={{ height: "32px", margin: "16px" }}
+        >
+          <Image src="/logo.png" preview={false} />
+        </div>
       </Link>
       <Menu
         onClick={onClick}
