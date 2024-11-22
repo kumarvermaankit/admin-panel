@@ -1,15 +1,15 @@
 import { Card, Row, Col } from "antd";
-import { useFeedbackCount, useLoginCount, useRegistrationsCount, useSpinWheelQuizCount } from "../../features/products/hooks/useDashboard";
+import { useFeedbackCount, useRegistrationsCount, useSpinWheelQuizCount } from "../../features/products/hooks/useDashboard";
 
 export const Dashboard = () => {
   const { data: registrationCount } = useRegistrationsCount();
-  const { data: loginCount } = useLoginCount()
+  // const { data: loginCount } = useLoginCount()
   const { data: quizCount } = useSpinWheelQuizCount();
   // const { data: busArrivalCount } = useBusesArrivalCount();
   const { data: feedbackCount } = useFeedbackCount();
   const cardData = [
     { title: "Registrations", value: registrationCount, key: "1" },
-    { title: "Logins", value: loginCount, key: "2" },
+    // { title: "Logins", value: loginCount, key: "2" },
     { title: "Spin Wheel - Quiz Answered", value: quizCount , key: "3" },
     // { title: "Bus Arrivals", value: busArrivalCount , key: "4" },
     { title: "Feedback Submissions", value: feedbackCount , key: "5" },
