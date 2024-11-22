@@ -94,6 +94,16 @@ const items: MenuItem[] = [
         icon: <RollbackOutlined />,
       },
       {
+        key: "/app-media",
+        label: "App Media",
+        icon: <RollbackOutlined />,
+      },
+      {
+        key: "/artists",
+        label: "Artist",
+        icon: <RollbackOutlined />,
+      },
+      {
         key: "/media",
         label: "Media",
         icon: <PictureOutlined />,

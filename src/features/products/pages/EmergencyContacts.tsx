@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Divider, Table, Input, Button, Space, message } from "antd";
 import { SectionHeader } from "../../../components/SectionHeader";
-import { CreateButton, KSpin } from "../../../components";
+import { KSpin } from "../../../components";
 import Wrapper from "../../../components/wrapper";
 import { useGetEmergencyContacts, useEditEmergencyContact } from "../hooks/useEmergencyContacts";
 
@@ -19,7 +19,6 @@ export const EmergencyContacts: React.FC = () => {
   const { mutate: editEmergencyContact } = useEditEmergencyContact();
   const [editingKey, setEditingKey] = useState<number | null>(null);
   const [editingRecord, setEditingRecord] = useState<EmergencyContact | null>(null);
-
   const isEditing = (record: EmergencyContact) => record.id === editingKey;
 
   const handleEdit = (record: EmergencyContact) => {
@@ -97,9 +96,16 @@ export const EmergencyContacts: React.FC = () => {
         ),
     },
     {
-      title: "Location ID",
-      dataIndex: "location_id",
-      key: "location_id",
+      title: "Location Name",
+      key: "location_info",
+      render: (_: unknown, record: any) => {
+        const locationName = record.locations?.name || "N/A";
+        const eventDate = record.locations?.event_date
+          ? new Date(record.locations.event_date).toLocaleDateString()
+          : "No Date";
+
+        return `${locationName} - ${eventDate}`;
+      },
     },
     {
       title: "Category ID",
@@ -154,7 +160,7 @@ export const EmergencyContacts: React.FC = () => {
     <Wrapper style={{ height: "calc(100vh - 48px)" }}>
       <SectionHeader
         title="Emergency Contacts"
-        children={<CreateButton title="Add Contact" route="/emergency-contacts/create" />}
+        // children={<CreateButton title="Add Contact" route="/emergency-contacts/create" />}
       />
       <Divider />
       <Table<EmergencyContact>

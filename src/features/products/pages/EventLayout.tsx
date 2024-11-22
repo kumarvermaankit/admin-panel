@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { Divider, Table, message, Space, Button } from "antd";
 import TimePicker from "react-time-picker"; // Import React-Time-Picker
 import "react-time-picker/dist/TimePicker.css"; // Optional CSS for styling
 import { SectionHeader } from "../../../components/SectionHeader";
-import { CreateButton, KSpin } from "../../../components";
+import { KSpin } from "../../../components";
 import Wrapper from "../../../components/wrapper";
 import { useEvents } from "../hooks/useEvents";
 import { editEvents } from "../api/eventApi";
@@ -14,6 +15,7 @@ interface Event {
   start_time: string;
   end_time: string;
   location_id: string;
+  locations: object
 }
 
 const Events: React.FC = () => {
@@ -125,9 +127,16 @@ const Events: React.FC = () => {
         ),
     },
     {
-      title: "Location ID",
-      dataIndex: "location_id",
-      key: "location_id",
+      title: "Location Name",
+      key: "location_info",
+      render: (_: unknown, record: any) => {
+        const locationName = record.locations?.name || "N/A";
+        const eventDate = record.locations?.event_date
+          ? new Date(record.locations.event_date).toLocaleDateString()
+          : "No Date";
+
+        return `${locationName} - ${eventDate}`;
+      },
     },
     {
       title: "Actions",
@@ -155,7 +164,7 @@ const Events: React.FC = () => {
     <Wrapper style={{ height: "calc(100vh - 48px)" }}>
       <SectionHeader
         title="Events"
-        children={<CreateButton title="Create Event" route="/events/create" />}
+        // children={<CreateButton title="Create Event" route="/events/create" />}
       />
       <Divider />
       <Table<Event>

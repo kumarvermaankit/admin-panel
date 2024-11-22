@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import { Divider, Table, Typography, Switch, Empty } from "antd";
+import { Divider, Table, Typography, Switch, Empty, message } from "antd";
 import { SectionHeader } from "../../../components";
 import Wrapper from "../../../components/wrapper";
 import SearchWithChips from "../../../components/SearchWithChips";
@@ -16,11 +16,12 @@ interface Location {
   bus_arrival_access: boolean;
   is_admin: boolean;
   registration_count_access: boolean;
+  locations: object
 }
 
 interface Employee {
   employee_id: number;
-  locations: Location[];
+  locationsVal: Location[];
 }
 
 const groupEmployeeData = (data: Array<{
@@ -30,27 +31,30 @@ const groupEmployeeData = (data: Array<{
   bus_arrival_access: boolean;
   is_admin: boolean;
   registration_count_access: boolean;
+  locations: object
 }>): Employee[] => {
   return data.reduce<Employee[]>((acc, entry) => {
     const existing = acc.find((item) => item.employee_id === entry.employee_id);
     if (existing) {
-      existing.locations.push({
+      existing.locationsVal.push({
         location_id: entry.location_id,
         feedback_submitted: entry.feedback_submitted,
         bus_arrival_access: entry.bus_arrival_access,
         is_admin: entry.is_admin,
         registration_count_access: entry.registration_count_access,
+        locations: entry.locations
       });
     } else {
       acc.push({
         employee_id: entry.employee_id,
-        locations: [
+        locationsVal: [
           {
             location_id: entry.location_id,
             feedback_submitted: entry.feedback_submitted,
             bus_arrival_access: entry.bus_arrival_access,
             is_admin: entry.is_admin,
             registration_count_access: entry.registration_count_access,
+            locations: entry.locations
           },
         ],
       });
@@ -86,33 +90,54 @@ const EmployeeAccess: React.FC = () => {
         if (employee.employee_id === employee_id) {
           return {
             ...employee,
-            locations: employee.locations.map((location) => {
-              if (location.location_id === location_id) {
-                return { ...location, [field]: value };
-              }
-              return location;
-            }),
+            locationsVal: employee?.locationsVal
+              ? employee?.locationsVal?.map((location) => {
+                  if (location.location_id === location_id) {
+                    return { ...location, [field]: value };
+                  }
+                  return location;
+                })
+              : [], // Ensure locationsVal is an array
           };
         }
         return employee;
       });
     });
 
-    // Perform the actual update
-    const response = await editEmployeesData(employee_id, location_id, { [field]: value });
+    try {
+      // Perform the actual update
+      const response = await editEmployeesData(employee_id, location_id, { [field]: value });
 
-    if (response.error) {
-      console.error(`Failed to update ${field}:`, response.error);
-      queryClient.invalidateQueries({ queryKey: ["employee_location", ids] }); // Fallback
-    } else {
-      console.log(`Successfully updated ${field}:`, response.data);
-      // Refetch to ensure fresh data
-      await queryClient.refetchQueries({ queryKey: ["employee_location", ids] });
+      if (response.error) {
+        console.error(`Failed to update ${field}:`, response.error);
+        message.error("Failed to update. Reverting changes.");
+        queryClient.invalidateQueries({ queryKey: ["employee_location", ids] }); // Fallback
+      } else {
+        console.log(`Successfully updated ${field}:`, response.data);
+        message.success("Update successful!");
+        // Refetch to ensure fresh data
+        await queryClient.refetchQueries({ queryKey: ["employee_location", ids] });
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      message.error("Unexpected error occurred. Reverting changes.");
+      queryClient.invalidateQueries({ queryKey: ["employee_location", ids] });
     }
   };
 
   const locationColumns = (employee_id: number) => [
-    { title: "Location ID", dataIndex: "location_id", key: "location_id" },
+    {
+      title: "Location Name",
+      key: "location_info",
+      render: (_: unknown, record: any) => {
+        const locationName = record.locations?.name || "N/A";
+        const eventDate = record.locations?.event_date
+          ? new Date(record.locations.event_date).toLocaleDateString()
+          : "No Date";
+
+        return `${locationName} - ${eventDate}`;
+      },
+    },
     {
       title: "Bus Arrival Access",
       dataIndex: "bus_arrival_access",
@@ -154,9 +179,7 @@ const EmployeeAccess: React.FC = () => {
   ];
 
   const processedData =
-  Array.isArray(data) && data.length > 0
-    ? groupEmployeeData(data)
-    : [];
+    Array.isArray(data) && data.length > 0 ? groupEmployeeData(data) : [];
 
   return (
     <Wrapper style={{ height: "calc(100vh - 48px)" }}>
@@ -183,7 +206,7 @@ const EmployeeAccess: React.FC = () => {
             <Title level={4}>Employee ID: {employee.employee_id}</Title>
             <Table
               columns={locationColumns(employee.employee_id)}
-              dataSource={employee.locations}
+              dataSource={employee.locationsVal}
               pagination={false}
               rowKey={(record) => record.location_id.toString()}
             />

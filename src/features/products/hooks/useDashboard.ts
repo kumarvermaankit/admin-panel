@@ -17,7 +17,7 @@ export const useTableCount = (queryKey: string, tableName: string) => {
   };
 
   export const useSpinWheelQuizCount = () => {
-    return useTableCount("employee_quiz_count", "employee_quiz_answers");
+    return useTableCount("employee_quiz_count", "quiz_user_spins");
   };
 
   export const useBusesArrivalCount = () => {

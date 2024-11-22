@@ -4,7 +4,7 @@ export const getEmployeesLocationAccessData = async (ids: number[]) => {
   try {
     const { data, error } = await supabaseClient
       .from("employee_locations")
-      .select("*")
+      .select("*,locations(*)")
       .in("employee_id", ids);
     if (error) {
       console.error("Error fetching employee location data:", error);
