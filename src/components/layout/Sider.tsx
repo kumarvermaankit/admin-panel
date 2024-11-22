@@ -89,6 +89,11 @@ const items: MenuItem[] = [
         icon: <RollbackOutlined />,
       },
       {
+        key: "/emergency-contacts",
+        label: "Emergency Contacts",
+        icon: <RollbackOutlined />,
+      },
+      {
         key: "/media",
         label: "Media",
         icon: <PictureOutlined />,

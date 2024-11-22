@@ -19,6 +19,7 @@ import {  WorkOrders } from "./features/work-orders";
 import EmployeeAccess from "./features/products/pages/EmployeeAccess";
 import Events from "./features/products/pages/EventLayout";
 import { CreateEvents } from "./features/products/pages/CreateEvents";
+import EmergencyContacts from "./features/products/pages/EmergencyContacts";
 
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
           <Route path="employee-access" element={<EmployeeAccess />} />
           <Route path="events" element={<Events />} />
           <Route path="events/create" element={<CreateEvents />} />
+          <Route path="emergency-contacts" element={<EmergencyContacts />} />
           <Route path="media" element={<MediaGallery />} />
         </Route>
       </Route>

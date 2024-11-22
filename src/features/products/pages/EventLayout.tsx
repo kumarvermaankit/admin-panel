@@ -8,19 +8,29 @@ import Wrapper from "../../../components/wrapper";
 import { useEvents } from "../hooks/useEvents";
 import { editEvents } from "../api/eventApi";
 
-const Events = () => {
+interface Event {
+  id: number;
+  event_name: string;
+  start_time: string;
+  end_time: string;
+  location_id: string;
+}
+
+const Events: React.FC = () => {
   const { data: events, error, isLoading } = useEvents();
-  const [updatedEvents, setUpdatedEvents] = useState([]);
-  const [editingKey, setEditingKey] = useState(null);
-  const [editingRecord, setEditingRecord] = useState(null);
+  const [updatedEvents, setUpdatedEvents] = useState<Event[]>([]);
+  const [editingKey, setEditingKey] = useState<number | null>(null);
+  const [editingRecord, setEditingRecord] = useState<Event | null>(null);
 
   useEffect(() => {
-    if (events) {
+    if (Array.isArray(events)) {
       setUpdatedEvents(events);
+    } else if (events && "error" in events) {
+      console.error("Error fetching events:", events.error);
     }
   }, [events]);
 
-  const isEditing = (record) => record.id === editingKey;
+  const isEditing = (record: Event) => record.id === editingKey;
 
   const handleSave = async () => {
     if (editingRecord) {
@@ -51,7 +61,7 @@ const Events = () => {
     }
   };
 
-  const handleEdit = (record) => {
+  const handleEdit = (record: Event) => {
     setEditingKey(record.id);
     setEditingRecord({ ...record });
   };
@@ -61,11 +71,13 @@ const Events = () => {
     setEditingRecord(null);
   };
 
-  const handleTimeChange = (field, value) => {
-    setEditingRecord((prev) => ({
-      ...prev,
-      [field]: value, // React-Time-Picker returns time in "HH:mm" format
-    }));
+  const handleTimeChange = (field: keyof Event, value: string | null) => {
+    if (editingRecord && value) {
+      setEditingRecord({
+        ...editingRecord,
+        [field]: value, // React-Time-Picker returns time in "HH:mm" format
+      });
+    }
   };
 
   const eventColumns = [
@@ -73,7 +85,7 @@ const Events = () => {
       title: "Sr",
       key: "sr",
       width: 80,
-      render: (_, __, index) => index + 1,
+      render: (_: unknown, __: unknown, index: number) => index + 1,
     },
     {
       title: "Event Name",
@@ -84,13 +96,13 @@ const Events = () => {
       title: "Start Time",
       dataIndex: "start_time",
       key: "start_time",
-      render: (_, record) =>
+      render: (_: string, record: Event) =>
         isEditing(record) ? (
           <TimePicker
             value={editingRecord?.id === record.id ? editingRecord.start_time : ""}
             onChange={(value) => handleTimeChange("start_time", value)}
             format="HH:mm"
-            disableClock={true}
+            disableClock
           />
         ) : (
           record.start_time || "N/A"
@@ -100,13 +112,13 @@ const Events = () => {
       title: "End Time",
       dataIndex: "end_time",
       key: "end_time",
-      render: (_, record) =>
+      render: (_: string, record: Event) =>
         isEditing(record) ? (
           <TimePicker
             value={editingRecord?.id === record.id ? editingRecord.end_time : ""}
             onChange={(value) => handleTimeChange("end_time", value)}
             format="HH:mm"
-            disableClock={true}
+            disableClock
           />
         ) : (
           record.end_time || "N/A"
@@ -120,7 +132,7 @@ const Events = () => {
     {
       title: "Actions",
       key: "actions",
-      render: (_, record) =>
+      render: (_: unknown, record: Event) =>
         isEditing(record) ? (
           <Space>
             <Button type="primary" onClick={handleSave}>
@@ -146,7 +158,7 @@ const Events = () => {
         children={<CreateButton title="Create Event" route="/events/create" />}
       />
       <Divider />
-      <Table
+      <Table<Event>
         columns={eventColumns}
         dataSource={updatedEvents}
         bordered

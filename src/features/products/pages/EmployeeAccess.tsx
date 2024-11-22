@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState } from "react";
 import { Divider, Table, Typography, Switch, Empty } from "antd";
 import { SectionHeader } from "../../../components";
 import Wrapper from "../../../components/wrapper";
@@ -9,6 +10,19 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const { Title, Text } = Typography;
 
+interface Location {
+  location_id: number;
+  feedback_submitted: boolean;
+  bus_arrival_access: boolean;
+  is_admin: boolean;
+  registration_count_access: boolean;
+}
+
+interface Employee {
+  employee_id: number;
+  locations: Location[];
+}
+
 const groupEmployeeData = (data: Array<{
   employee_id: number;
   location_id: number;
@@ -16,17 +30,8 @@ const groupEmployeeData = (data: Array<{
   bus_arrival_access: boolean;
   is_admin: boolean;
   registration_count_access: boolean;
-}>) => {
-  const grouped = data.reduce((acc: Array<{
-    employee_id: number;
-    locations: Array<{
-      location_id: number;
-      feedback_submitted: boolean;
-      bus_arrival_access: boolean;
-      is_admin: boolean;
-      registration_count_access: boolean;
-    }>;
-  }>, entry) => {
+}>): Employee[] => {
+  return data.reduce<Employee[]>((acc, entry) => {
     const existing = acc.find((item) => item.employee_id === entry.employee_id);
     if (existing) {
       existing.locations.push({
@@ -52,11 +57,10 @@ const groupEmployeeData = (data: Array<{
     }
     return acc;
   }, []);
-  return grouped;
 };
 
-const EmployeeAccess = () => {
-  const queryClient = useQueryClient(); 
+const EmployeeAccess: React.FC = () => {
+  const queryClient = useQueryClient();
   const [ids, setIds] = useState<number[]>([]);
 
   const { data, isLoading, isError, error } = useEmployeeLocation(ids);
@@ -69,38 +73,41 @@ const EmployeeAccess = () => {
   const handleFieldChange = async (
     employee_id: number,
     location_id: number,
-    field: string,
+    field: keyof Location,
     value: boolean
   ) => {
     console.log(`Updating ${field} for employee ${employee_id}, location ${location_id} to ${value}`);
-  
+
     // Optimistic update
-    queryClient.setQueryData(["employee_location", ids], (oldData: any) => {
+    queryClient.setQueryData(["employee_location", ids], (oldData: Employee[] | undefined) => {
       if (!oldData) return oldData;
-  
+
       return oldData.map((employee) => {
         if (employee.employee_id === employee_id) {
-          employee.locations = employee.locations.map((location) => {
-            if (location.location_id === location_id) {
-              return { ...location, [field]: value };
-            }
-            return location;
-          });
+          return {
+            ...employee,
+            locations: employee.locations.map((location) => {
+              if (location.location_id === location_id) {
+                return { ...location, [field]: value };
+              }
+              return location;
+            }),
+          };
         }
         return employee;
       });
     });
-  
+
     // Perform the actual update
     const response = await editEmployeesData(employee_id, location_id, { [field]: value });
-  
+
     if (response.error) {
       console.error(`Failed to update ${field}:`, response.error);
-      queryClient.invalidateQueries(["employee_location", ids]); // Fallback
+      queryClient.invalidateQueries({ queryKey: ["employee_location", ids] }); // Fallback
     } else {
       console.log(`Successfully updated ${field}:`, response.data);
       // Refetch to ensure fresh data
-      await queryClient.refetchQueries(["employee_location", ids], { exact: true });
+      await queryClient.refetchQueries({ queryKey: ["employee_location", ids] });
     }
   };
 
@@ -110,7 +117,7 @@ const EmployeeAccess = () => {
       title: "Bus Arrival Access",
       dataIndex: "bus_arrival_access",
       key: "bus_arrival_access",
-      render: (value: boolean, record: { location_id: number }) => (
+      render: (value: boolean, record: Location) => (
         <Switch
           checked={value}
           onChange={(checked) =>
@@ -123,7 +130,7 @@ const EmployeeAccess = () => {
       title: "Registration Count Access",
       dataIndex: "registration_count_access",
       key: "registration_count_access",
-      render: (value: boolean, record: { location_id: number }) => (
+      render: (value: boolean, record: Location) => (
         <Switch
           checked={value}
           onChange={(checked) =>
@@ -146,7 +153,10 @@ const EmployeeAccess = () => {
     },
   ];
 
-  const processedData = data ? groupEmployeeData(data) : [];
+  const processedData =
+  Array.isArray(data) && data.length > 0
+    ? groupEmployeeData(data)
+    : [];
 
   return (
     <Wrapper style={{ height: "calc(100vh - 48px)" }}>
@@ -175,7 +185,7 @@ const EmployeeAccess = () => {
               columns={locationColumns(employee.employee_id)}
               dataSource={employee.locations}
               pagination={false}
-              rowKey={(record) => record.location_id}
+              rowKey={(record) => record.location_id.toString()}
             />
           </div>
         ))
