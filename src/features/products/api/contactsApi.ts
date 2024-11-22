@@ -5,7 +5,7 @@ export const getEmergencyContactsData = async () => {
   try {
     const { data, error } = await supabaseClient
       .from("emergency_contacts")
-      .select("*");
+      .select("*,locations(*)");
     if (error) {
       console.error("Error fetching emergency contacts data:", error);
       return { error };
