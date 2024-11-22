@@ -18,6 +18,7 @@ import { Operations } from "./features/operations";
 import {  WorkOrders } from "./features/work-orders";
 import EmployeeAccess from "./features/products/pages/EmployeeAccess";
 import Events from "./features/products/pages/EventLayout";
+import { CreateEvents } from "./features/products/pages/CreateEvents";
 
 
 function App() {
@@ -51,7 +52,8 @@ function App() {
           {/* Media */}
           <Route path="work-orders" element={<WorkOrders />} />
           <Route path="employee-access" element={<EmployeeAccess />} />
-          <Route path="event-layout" element={<Events />} />
+          <Route path="events" element={<Events />} />
+          <Route path="events/create" element={<CreateEvents />} />
           <Route path="media" element={<MediaGallery />} />
         </Route>
       </Route>

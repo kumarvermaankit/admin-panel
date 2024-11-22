@@ -84,7 +84,7 @@ const items: MenuItem[] = [
         icon: <RollbackOutlined />,
       },
       {
-        key: "/event-layout",
+        key: "/events",
         label: "Events",
         icon: <RollbackOutlined />,
       },

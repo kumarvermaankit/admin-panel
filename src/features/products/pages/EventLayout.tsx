@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Divider, Table, TimePicker, message, Space, Button } from "antd";
-import dayjs from "dayjs"; // Import Day.js
-import customParseFormat from "dayjs/plugin/customParseFormat"; // Import plugin for custom formats
+import { Divider, Table, message, Space, Button } from "antd";
+import TimePicker from "react-time-picker"; // Import React-Time-Picker
+import "react-time-picker/dist/TimePicker.css"; // Optional CSS for styling
 import { SectionHeader } from "../../../components/SectionHeader";
 import { CreateButton, KSpin } from "../../../components";
 import Wrapper from "../../../components/wrapper";
 import { useEvents } from "../hooks/useEvents";
-
-// Extend Day.js with custom parse format
-dayjs.extend(customParseFormat);
+import { editEvents } from "../api/eventApi";
 
 const Events = () => {
   const { data: events, error, isLoading } = useEvents();
@@ -16,7 +14,6 @@ const Events = () => {
   const [editingKey, setEditingKey] = useState(null);
   const [editingRecord, setEditingRecord] = useState(null);
 
-  // Sync `updatedEvents` with `events` whenever `events` changes
   useEffect(() => {
     if (events) {
       setUpdatedEvents(events);
@@ -25,19 +22,32 @@ const Events = () => {
 
   const isEditing = (record) => record.id === editingKey;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editingRecord) {
       const { id, start_time, end_time } = editingRecord;
-      const newData = updatedEvents.map((item) =>
-        item.id === id ? { ...item, start_time, end_time } : item
-      );
-      setUpdatedEvents(newData);
-      setEditingKey(null);
-      setEditingRecord(null);
 
-      // Optionally send the updated values to the server
-      // Replace this with your API call
-      message.success("Changes saved successfully!");
+      try {
+        const response = await editEvents(id, { start_time, end_time });
+
+        if (response.error) {
+          message.error("Failed to save changes.");
+        } else {
+          const updatedData = [...updatedEvents];
+          const index = updatedData.findIndex((item) => item.id === id);
+
+          if (index > -1) {
+            updatedData[index] = { ...updatedData[index], start_time, end_time };
+            setUpdatedEvents(updatedData);
+          }
+
+          setEditingKey(null);
+          setEditingRecord(null);
+          message.success("Changes saved successfully!");
+        }
+      } catch (err) {
+        message.error("Unexpected error occurred while saving changes.");
+        console.error(err);
+      }
     }
   };
 
@@ -51,10 +61,10 @@ const Events = () => {
     setEditingRecord(null);
   };
 
-  const handleTimeChange = (field, time, timeString) => {
+  const handleTimeChange = (field, value) => {
     setEditingRecord((prev) => ({
       ...prev,
-      [field]: timeString,
+      [field]: value, // React-Time-Picker returns time in "HH:mm" format
     }));
   };
 
@@ -77,16 +87,10 @@ const Events = () => {
       render: (_, record) =>
         isEditing(record) ? (
           <TimePicker
-            use12Hours
-            format="h:mm:ss A"
-            value={
-              editingRecord?.id === record.id
-                ? dayjs(editingRecord.start_time, "h:mm:ss A")
-                : null
-            }
-            onChange={(time, timeString) =>
-              handleTimeChange("start_time", time, timeString)
-            }
+            value={editingRecord?.id === record.id ? editingRecord.start_time : ""}
+            onChange={(value) => handleTimeChange("start_time", value)}
+            format="HH:mm"
+            disableClock={true}
           />
         ) : (
           record.start_time || "N/A"
@@ -99,16 +103,10 @@ const Events = () => {
       render: (_, record) =>
         isEditing(record) ? (
           <TimePicker
-            use12Hours
-            format="h:mm:ss A"
-            value={
-              editingRecord?.id === record.id
-                ? dayjs(editingRecord.end_time, "h:mm:ss A")
-                : null
-            }
-            onChange={(time, timeString) =>
-              handleTimeChange("end_time", time, timeString)
-            }
+            value={editingRecord?.id === record.id ? editingRecord.end_time : ""}
+            onChange={(value) => handleTimeChange("end_time", value)}
+            format="HH:mm"
+            disableClock={true}
           />
         ) : (
           record.end_time || "N/A"
