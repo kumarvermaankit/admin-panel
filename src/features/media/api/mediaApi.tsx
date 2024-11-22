@@ -3,7 +3,7 @@ import { RcFile } from "antd/es/upload";
 import { supabaseClient } from "../../../utility/supabaseClient";
 import { IMedia } from "../types/mediaInterfaces";
 
-const BUCKET_NAME = "maruti_family_day_1"
+const BUCKET_NAME = "maruti_family_day_1";
 // Fetch Media
 export const fetchMediaGallery = async (
   page: number,
@@ -35,11 +35,7 @@ export const fetchMediaGallery = async (
   return { data: data as IMedia[], total: count || 0 };
 };
 
-// Insert Media
-
-// Insert Media
 export const insertMedia = async (file: RcFile): Promise<void> => {
-  // Step 1: Upload file to Supabase storage
   const { error: uploadError } = await supabaseClient.storage
     .from(BUCKET_NAME)
     .upload(`assets/${file.name}`, file, {
@@ -47,28 +43,23 @@ export const insertMedia = async (file: RcFile): Promise<void> => {
       upsert: false,
     });
 
-  // If upload fails, throw the error
   if (uploadError) {
     throw uploadError;
   }
 
-  // Step 2: Get the public URL of the uploaded file
   const { data: publicUrlData } = await supabaseClient.storage
     .from(BUCKET_NAME)
     .getPublicUrl(`assets/${file.name}`);
 
-  // If public URL retrieval fails, throw an error
   if (!publicUrlData) {
     throw new Error("Failed to retrieve public URL");
   }
 
-  // Step 3: Insert the public URL into the media table
   const { error } = await supabaseClient
     .from("media")
     .insert({ url: publicUrlData.publicUrl, file_name: file.name })
     .single();
 
-  // If insertion fails, throw a new error
   if (error) {
     throw new Error(error.message);
   }
@@ -76,24 +67,40 @@ export const insertMedia = async (file: RcFile): Promise<void> => {
 
 // Delete Media
 export const deleteMedia = async (media: IMedia): Promise<void> => {
-  // Step 1: Delete file from Supabase storage
-  console.log(media)
-  const lastIndex = media?.url?.lastIndexOf("/");
-  const { error: deleteError } = await supabaseClient.storage
-    .from(BUCKET_NAME)
-    .remove([`assets/${media?.url?.slice(lastIndex+1)}`]);
-
-  if (deleteError) {
-    debugger;
-    throw new Error(deleteError.message);
+  if (!media?.url) {
+    throw new Error("Media URL is required");
   }
-  // debugger;
-  // const { error } = await supabaseClient
-  //   .from("media")
-  //   .delete()
-  //   .eq("id", media.id);
 
-  // if (error) {
-  //   throw new Error(error.message);
-  // }
+  try {
+    const fileUrl = new URL(media.url);
+    const fileName = fileUrl.pathname.split("/").pop();
+    console.log(` File Name ${fileName}`);
+
+    if (!fileName) {
+      throw new Error("Invalid file name in URL");
+    }
+
+    // Delete from storage
+    const { error: storageError } = await supabaseClient.storage
+      .from(BUCKET_NAME)
+      .remove([`assets/${fileName}`]);
+
+    if (storageError) {
+      throw new Error(`Storage deletion failed: ${storageError.message}`);
+    }
+
+    // Delete from database
+    const { error: dbError } = await supabaseClient
+      .from("media")
+      .delete()
+      .eq("id", media.id);
+
+    if (dbError) {
+      throw new Error(`Database deletion failed: ${dbError.message}`);
+    }
+  } catch (error) {
+    throw error instanceof Error
+      ? error
+      : new Error("An unknown error occurred");
+  }
 };
