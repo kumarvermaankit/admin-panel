@@ -1,37 +1,68 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Form, message, TimePicker, Select } from "antd";
 import { SectionHeader } from "../../../components";
 import Wrapper from "../../../components/wrapper";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetEventsName, useGetLocations } from "../hooks/useEvents"; // Fetch event names and locations
+import { useGetEventsName, useGetLocations } from "../hooks/useEvents";
 import { addEvents } from "../api/eventApi";
 
-export const CreateEvents = () => {
+interface EventOption {
+  label: string;
+  value: number;
+}
+
+interface LocationOption {
+  label: string;
+  value: number;
+}
+
+export const CreateEvents: React.FC = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch event names for the dropdown
-  const { data: eventNames, isLoading: isLoadingEvents, error: errorEvents } = useGetEventsName();
-  const { data: locationNames, isLoading: isLoadingLocations, error: errorLocations } = useGetLocations();
+  const {
+    data: eventNames,
+    isLoading: isLoadingEvents,
+    error: errorEvents,
+  } = useGetEventsName();
+  const {
+    data: locationNames,
+    isLoading: isLoadingLocations,
+    error: errorLocations,
+  } = useGetLocations();
 
   if (isLoadingEvents || isLoadingLocations) return <div>Loading data...</div>;
   if (errorEvents) return <div>Error loading event names: {errorEvents.message}</div>;
   if (errorLocations) return <div>Error loading locations: {errorLocations.message}</div>;
 
   // Dropdown options for event names
-  const eventOptions = eventNames?.map((event) => ({
-    label: event.name, // Assuming `name` is the property for the event name
-    value: event.id, // Assuming `id` is the unique identifier
-  }));
+// Dropdown options for event names
+const eventOptions: EventOption[] =
+  Array.isArray(eventNames)
+    ? eventNames.map((event: any) => ({
+        label: event.name, // Assuming `name` is the property for the event name
+        value: event.id, // Assuming `id` is the unique identifier
+      }))
+    : [];
 
-  // Dropdown options for locations
-  const locationOptions = locationNames?.map((location) => ({
-    label: location.name, // Assuming `name` is the property for the location name
-    value: location.id, // Assuming `id` is the unique identifier
-  }));
+// Dropdown options for locations
+const locationOptions: LocationOption[] =
+  Array.isArray(locationNames)
+    ? locationNames.map((location: any) => ({
+        label: location.name, // Assuming `name` is the property for the location name
+        value: location.id, // Assuming `id` is the unique identifier
+      }))
+    : [];
 
-  const handleSubmit = async (values) => {
+
+  const handleSubmit = async (values: {
+    event_name: number;
+    start_time: moment.Moment;
+    end_time: moment.Moment;
+    location: number;
+  }) => {
     try {
       setIsSubmitting(true);
 
@@ -53,7 +84,7 @@ export const CreateEvents = () => {
     }
   };
 
-  const checkKeyDown = (e: React.KeyboardEvent) => {
+  const checkKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     if (e.key === "Enter") e.preventDefault(); // Prevent form submission on Enter
   };
 
