@@ -2,6 +2,8 @@ import {
   // AppstoreOutlined,
   // BarsOutlined,
   LogoutOutlined,
+  PictureOutlined,
+  RollbackOutlined,
   // PictureOutlined,
   // ScheduleOutlined,
   // ShoppingCartOutlined,
@@ -75,7 +77,23 @@ type MenuItem = Required<MenuProps>["items"][number];
 //   },
 // ];
 
-const items: MenuItem[] = [];
+const items: MenuItem[] = [
+  {
+        key: "/employee-access",
+        label: "Employee Access",
+        icon: <RollbackOutlined />,
+      },
+      {
+        key: "/events",
+        label: "Events",
+        icon: <RollbackOutlined />,
+      },
+      {
+        key: "/media",
+        label: "Media",
+        icon: <PictureOutlined />,
+      },
+];
 
 export const KSider = () => {
   const navigate = useNavigate();
@@ -98,6 +116,13 @@ export const KSider = () => {
         zIndex: 1,
       }}
     >
+      <div 
+       style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "45px"
+      }}
+      >
       <Link to={"/"}>
         <div
           className="logo"
@@ -136,6 +161,7 @@ export const KSider = () => {
             Logout
           </Button>
         </Popconfirm>
+      </div>
       </div>
     </Sider>
   );
