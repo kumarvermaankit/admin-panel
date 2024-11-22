@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { Divider, Table, Image, Button } from "antd";
+import { Divider, Table, Image } from "antd";
 import { SectionHeader } from "../../../components/SectionHeader";
 import { KSpin } from "../../../components";
 import Wrapper from "../../../components/wrapper";
@@ -80,7 +80,6 @@ const Artists: React.FC = () => {
     <Wrapper style={{ height: "calc(100vh - 48px)" }}>
       <SectionHeader
         title="Artists"
-        children={<Button type="primary">Add Artist</Button>}
       />
       <Divider />
       <Table
