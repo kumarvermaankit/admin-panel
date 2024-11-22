@@ -1,7 +1,9 @@
+/* eslint-disable no-debugger */
 import { RcFile } from "antd/es/upload";
 import { supabaseClient } from "../../../utility/supabaseClient";
 import { IMedia } from "../types/mediaInterfaces";
 
+const BUCKET_NAME = "maruti_family_day_1"
 // Fetch Media
 export const fetchMediaGallery = async (
   page: number,
@@ -39,8 +41,8 @@ export const fetchMediaGallery = async (
 export const insertMedia = async (file: RcFile): Promise<void> => {
   // Step 1: Upload file to Supabase storage
   const { error: uploadError } = await supabaseClient.storage
-    .from("mrp")
-    .upload(`products/${file.name}`, file, {
+    .from(BUCKET_NAME)
+    .upload(`assets/${file.name}`, file, {
       cacheControl: "3600",
       upsert: false,
     });
@@ -52,8 +54,8 @@ export const insertMedia = async (file: RcFile): Promise<void> => {
 
   // Step 2: Get the public URL of the uploaded file
   const { data: publicUrlData } = await supabaseClient.storage
-    .from("mrp")
-    .getPublicUrl(`products/${file.name}`);
+    .from(BUCKET_NAME)
+    .getPublicUrl(`assets/${file.name}`);
 
   // If public URL retrieval fails, throw an error
   if (!publicUrlData) {
@@ -75,20 +77,23 @@ export const insertMedia = async (file: RcFile): Promise<void> => {
 // Delete Media
 export const deleteMedia = async (media: IMedia): Promise<void> => {
   // Step 1: Delete file from Supabase storage
+  console.log(media)
+  const lastIndex = media?.url?.lastIndexOf("/");
   const { error: deleteError } = await supabaseClient.storage
-    .from("mrp")
-    .remove([`products/${media.file_name}`]);
+    .from(BUCKET_NAME)
+    .remove([`assets/${media?.url?.slice(lastIndex+1)}`]);
 
   if (deleteError) {
+    debugger;
     throw new Error(deleteError.message);
   }
+  // debugger;
+  // const { error } = await supabaseClient
+  //   .from("media")
+  //   .delete()
+  //   .eq("id", media.id);
 
-  const { error } = await supabaseClient
-    .from("media")
-    .delete()
-    .eq("id", media.id);
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  // if (error) {
+  //   throw new Error(error.message);
+  // }
 };

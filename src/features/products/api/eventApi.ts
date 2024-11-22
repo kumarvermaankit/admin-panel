@@ -15,3 +15,7 @@ export const getEventsData = async () => {
         console.log(err);
       }
 }
+
+export const addEvents = async (id: number, params: Object) => {
+
+}

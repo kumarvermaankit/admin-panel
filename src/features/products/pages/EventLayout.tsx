@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Divider, Table, TimePicker, message, Space, Button } from "antd";
-import moment from "moment"; // Import moment for time handling
+import dayjs from "dayjs"; // Import Day.js
+import customParseFormat from "dayjs/plugin/customParseFormat"; // Import plugin for custom formats
 import { SectionHeader } from "../../../components/SectionHeader";
 import { CreateButton, KSpin } from "../../../components";
 import Wrapper from "../../../components/wrapper";
 import { useEvents } from "../hooks/useEvents";
 
+// Extend Day.js with custom parse format
+dayjs.extend(customParseFormat);
+
 const Events = () => {
   const { data: events, error, isLoading } = useEvents();
   const [updatedEvents, setUpdatedEvents] = useState([]);
   const [editingKey, setEditingKey] = useState(null);
-  const [editingRecord, setEditingRecord] = useState(null); // Track the current editing record
+  const [editingRecord, setEditingRecord] = useState(null);
 
   // Sync `updatedEvents` with `events` whenever `events` changes
   useEffect(() => {
@@ -77,7 +81,7 @@ const Events = () => {
             format="h:mm:ss A"
             value={
               editingRecord?.id === record.id
-                ? moment(editingRecord.start_time, "h:mm:ss A")
+                ? dayjs(editingRecord.start_time, "h:mm:ss A")
                 : null
             }
             onChange={(time, timeString) =>
@@ -99,7 +103,7 @@ const Events = () => {
             format="h:mm:ss A"
             value={
               editingRecord?.id === record.id
-                ? moment(editingRecord.end_time, "h:mm:ss A")
+                ? dayjs(editingRecord.end_time, "h:mm:ss A")
                 : null
             }
             onChange={(time, timeString) =>
