@@ -8,17 +8,16 @@ import {
   Button,
   Upload,
   message,
-  Popconfirm,
 } from "antd";
 import { useEffect, useState } from "react";
 import { IMedia } from "../features/media/types/mediaInterfaces";
 import {
   useCreateMedia,
-  useDeleteMedia,
+  // useDeleteMedia,
   useMedia,
 } from "../features/media/hooks/useMedia";
 import { KSpin } from "./KSpin";
-import { CloudUploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import { CloudUploadOutlined } from "@ant-design/icons";
 import { RcFile } from "antd/es/upload";
 
 interface MediaProps {
@@ -35,7 +34,7 @@ export const Media: React.FC<MediaProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const { data, error, isLoading } = useMedia(currentPage);
   const { mutate: createMedia, isPending: isUploading } = useCreateMedia();
-  const { mutate: deleteMedia } = useDeleteMedia();
+  // const { mutate: deleteMedia } = useDeleteMedia();
 
   const [loadingImages, setLoadingImages] = useState(true);
 
@@ -59,18 +58,18 @@ export const Media: React.FC<MediaProps> = ({
     return false; // Prevent upload from happening twice
   };
 
-  const handleDelete = (media: IMedia) => {
-    deleteMedia(media, {
-      onSuccess: () => {
-        message.success(`Deleted media with ID: ${media.file_name}`);
-      },
-      onError: (error) => {
-        message.error(
-          `Failed to delete media with ID: ${media.file_name}. Error: ${error.message}`
-        );
-      },
-    });
-  };
+  // const handleDelete = (media: IMedia) => {
+  //   deleteMedia(media, {
+  //     onSuccess: () => {
+  //       message.success(`Deleted media with ID: ${media.file_name}`);
+  //     },
+  //     onError: (error) => {
+  //       message.error(
+  //         `Failed to delete media with ID: ${media.file_name}. Error: ${error.message}`
+  //       );
+  //     },
+  //   });
+  // };
 
   if (isLoading) return <KSpin />;
   if (error) return <div>Error: {error.message}</div>;
@@ -107,7 +106,7 @@ export const Media: React.FC<MediaProps> = ({
               }
               onClick={() => onSelect && onSelect(media)}
             >
-              <Popconfirm
+              {/* <Popconfirm
                 onConfirm={(e) => {
                   e?.stopPropagation();
                   handleDelete(media);
@@ -127,7 +126,7 @@ export const Media: React.FC<MediaProps> = ({
                     e.stopPropagation();
                   }}
                 />
-              </Popconfirm>
+              </Popconfirm> */}
 
               <Card.Meta title={media.file_name} />
             </Card>
